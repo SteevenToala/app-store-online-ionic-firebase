@@ -1,0 +1,7 @@
+{
+  "name": "appStoreOnline",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
