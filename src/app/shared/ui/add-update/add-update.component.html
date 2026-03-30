@@ -1,0 +1,49 @@
+<app-header
+  [isModal]="true"
+  [title]="product ? 'Actualizar Producto':'Registrar Producto'"
+></app-header>
+<ion-content>
+  <form [formGroup]="form" 
+    class="ion-padding ion-text-center" 
+    (keypress.enter)="submit()">
+    @if (form.value.image) {
+      <ion-avatar>
+        <img [src]="form.value.image">
+      </ion-avatar>
+    }
+    @if (!form.value.image) {
+      <ion-icon class="image-icon" name="image-outline"></ion-icon>    
+    }
+    <br>
+    <ion-button (click)="takeImage()" 
+      mode="ios" size="small" shape="round">
+    </ion-button>
+    <app-custom-imput
+      autocomplete="name"
+      [control]="form.controls.name"
+      type="text"
+      label="Nombre"
+    ></app-custom-imput>
+    <app-custom-imput
+      [control]="form.controls.price"
+      type="number"
+      label="Precio"
+      (ionInput)="setNumberInputs()"
+    ></app-custom-imput>    
+    <app-custom-imput
+      [control]="form.controls.soldUnits"
+      type="number"
+      label="Unidades Vendidas"
+      (ionInput)="setNumberInputs()"
+    ></app-custom-imput>    
+    <ion-button
+      mode="ios"
+      class="ion-margin"
+      type="submit"
+      [disabled]="form.invalid"
+      (click)="submit()"
+    >{{ product ? 'Actualizar Producto' : 'Registrar Producto' }}
+    <ion-icon slot="end" name="checkmark-circle-outline"></ion-icon>
+  </ion-button>
+  </form>
+</ion-content>
