@@ -1,0 +1,81 @@
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { IonContent, IonRefresher, IonRefresherContent, IonCard, IonCardContent,
+        IonList, IonItemSliding, IonItem, IonAvatar, IonLabel, IonChip, IonItemOptions,
+        IonItemOption, IonIcon, IonFab, IonFabButton
+ } from '@ionic/angular/standalone';
+import { HeaderComponent } from 'src/app/shared/ui/header/header.component';
+import { Product } from 'src/app/models/product';
+import { Firebase } from 'src/app/services/firebase';
+import { Utils } from 'src/app/services/utils';
+import { User } from 'src/app/models/user';
+import { AddUpdateComponent } from 'src/app/shared/ui/add-update/add-update.component';
+import { orderBy } from 'firebase/firestore';
+
+@Component({
+  selector: 'app-list',
+  templateUrl: './list.page.html',
+  styleUrls: ['./list.page.scss'],
+  standalone: true,
+  imports: [CommonModule, FormsModule, HeaderComponent, IonContent, IonRefresher, 
+    IonRefresherContent, IonCard, IonCardContent, IonList, IonItemSliding, IonItem, 
+    IonAvatar, IonLabel, IonChip, IonItemOptions, IonItemOption, IonIcon, IonFab, 
+    IonFabButton]
+})
+export class ListPage implements OnInit {
+  products:Product[]=[]
+  loading:boolean = false
+
+  firebaseSrv = inject(Firebase)
+  utilsSrv = inject(Utils)
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
+  user():User{
+    return this.utilsSrv.getFromLocalStorage('user') as User
+  }
+
+  doRefresh(event:any){
+    setTimeout(() => {
+      this.getProducts()
+      event.target.complete()
+    },2000)
+  }
+
+  ionViewWillEnter(){
+    this.getProducts()
+  }
+
+  async addUpdateProduct(product?:Product){
+    let success = await this.utilsSrv.showModal({
+      component:AddUpdateComponent,
+      cssClass:'add-update-modal',
+      componentProps:{product:product}
+    }) 
+    if(success) this.getProducts()
+  }
+
+  deleteProduct(item:Product){
+
+  }
+
+  getProducts(){
+    let path = `users/${this.user().uid}/products`
+    this.loading = true
+    let query = [
+      orderBy('soldUnits','desc')
+    ]
+    let sub = this.firebaseSrv.getCollectionData(path,query).subscribe({
+      next:(res:any) => {
+        this.products = res
+        this.loading = false
+        sub.unsubscribe
+      }
+    })
+  }
+
+}

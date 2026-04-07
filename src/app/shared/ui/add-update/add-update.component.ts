@@ -1,21 +1,95 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { CustomInputComponent } from '../custom-input/custom-input.component';
 import { IonContent, IonAvatar, IonIcon, IonButton } from '@ionic/angular/standalone'
-import { ReactiveFormsModule, InternalFormsSharedModule } from "@angular/forms";
+import { FormControl, FormGroup, ReactiveFormsModule, Validators, ɵInternalFormsSharedModule } from "@angular/forms";
+import { Product } from 'src/app/models/product';
+import { User } from 'src/app/models/user';
+import { Firebase } from 'src/app/services/firebase';
+import { Utils } from 'src/app/services/utils';
 
 @Component({
   selector: 'app-add-update',
   templateUrl: './add-update.component.html',
   styleUrls: ['./add-update.component.scss'],
   imports: [HeaderComponent, CustomInputComponent, IonContent,
-    IonAvatar, IonIcon, IonButton, ReactiveFormsModule]
+    IonAvatar, IonIcon, IonButton, ReactiveFormsModule] 
 })
-export class AddUpdateComponent implements OnInit {
-  @Input() product: any;
+export class AddUpdateComponent  implements OnInit {
+  @Input() product:Product
+  form = new FormGroup({
+    id: new FormControl(''),
+    image: new FormControl(''),
+    name: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    price: new FormControl(0, [Validators.required, Validators.min(0)]),
+    soldUnits: new FormControl(0, [Validators.required, Validators.min(0)]),
+  })
 
-  constructor() { }
+  firebaseSrv = inject(Firebase)
+  utilsSrv = inject(Utils)
 
-  ngOnInit() { }
+  user = {} as User
+  
+  constructor() { 
+    this.product={id:'',image:'',name:'',price:0, soldUnits:0}
+  }
 
+  ngOnInit() {
+    this.user = this.utilsSrv.getFromLocalStorage('user') as User
+    if(this.product) this.form.setValue(this.product)
+  }
+
+  setNumberInputs(){
+
+  }
+
+  submit(){
+    if(this.form.valid){
+      if(this.product) this.updateProduct()
+        else this.addProduct()
+    }
+  }
+
+  takeImage(){
+    
+  }
+
+  updateProduct(){
+
+  }
+
+  async addProduct(){
+    let path = `users/${this.user.uid}/products`
+    const loading = await this.utilsSrv.showLoading()
+    loading.present()
+
+    let dataUrl = this.form.value.image
+    let imagePath = `${this.user.uid}/${Date.now()}l`
+    let imageUrl = 'url'
+
+    this.form.controls.image.setValue(imageUrl)
+    delete this.form.value.id
+
+    this.firebaseSrv.addDocument(path, this.form.value).then(async res => {
+      this.utilsSrv.dissmissModal({success:true})
+      this.utilsSrv.showToast({
+        message:'Registro exitoso',
+        color:'primary',
+        duration:2000,
+        position:'middle',
+        icon:'person-circle-outline'
+      }).catch(error => {
+        this.utilsSrv.showToast({
+          message:error.message,
+          color:'danger',
+          duration:2000,
+          position:'middle',
+          icon:'alert-circle-outline'
+        })        
+      }).finally(() => {
+        loading.dismiss()
+      })
+    })
+
+  }
 }

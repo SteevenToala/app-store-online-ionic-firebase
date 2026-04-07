@@ -12,12 +12,12 @@
   </ion-input>
   @if (isPassword) {
   <ion-button
-    (click)="showOrHIdePassword()"
+    (click)="showOrHidePassword()"
     slot="end"
     fill="clear"
     shape="round"
   >
-    <ion-icon slot="icon-only" [name]="hide ? 'eye-outline' : 'eye-off-outline'"></ion-icon>
+    <ion-icon slot="icon-only" [name]="hide ? 'eye-outline':'oye-off-outline'"></ion-icon>
   </ion-button>
   }
 </ion-item>
