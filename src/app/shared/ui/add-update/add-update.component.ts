@@ -2,7 +2,7 @@ import { Component, inject, Input, OnInit } from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { CustomInputComponent } from '../custom-input/custom-input.component';
 import { IonContent, IonAvatar, IonIcon, IonButton } from '@ionic/angular/standalone'
-import { FormControl, FormGroup, ReactiveFormsModule, Validators, ɵInternalFormsSharedModule } from "@angular/forms";
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { Product } from 'src/app/models/product';
 import { User } from 'src/app/models/user';
 import { Firebase } from 'src/app/services/firebase';
@@ -16,7 +16,7 @@ import { Utils } from 'src/app/services/utils';
     IonAvatar, IonIcon, IonButton, ReactiveFormsModule] 
 })
 export class AddUpdateComponent  implements OnInit {
-  @Input() product:Product
+  @Input() product?:Product
   form = new FormGroup({
     id: new FormControl(''),
     image: new FormControl(''),
@@ -29,14 +29,12 @@ export class AddUpdateComponent  implements OnInit {
   utilsSrv = inject(Utils)
 
   user = {} as User
-  
-  constructor() { 
-    this.product={id:'',image:'',name:'',price:0, soldUnits:0}
-  }
+
+  constructor() { }
 
   ngOnInit() {
     this.user = this.utilsSrv.getFromLocalStorage('user') as User
-    if(this.product) this.form.setValue(this.product)
+    if(this.product?.id) this.form.setValue(this.product)
   }
 
   setNumberInputs(){
@@ -45,7 +43,7 @@ export class AddUpdateComponent  implements OnInit {
 
   submit(){
     if(this.form.valid){
-      if(this.product) this.updateProduct()
+      if(this.product?.id) this.updateProduct()
         else this.addProduct()
     }
   }
@@ -55,7 +53,33 @@ export class AddUpdateComponent  implements OnInit {
   }
 
   updateProduct(){
+    let path = `users/${this.user.uid}/products/${this.product?.id}`
+    const loading = this.utilsSrv.showLoading()
+    loading.then((res) => res.present())
 
+    const data = { ...this.form.value }
+    delete data.id
+
+    this.firebaseSrv.updateDocument(path, data).then(() => {
+      this.utilsSrv.dissmissModal({success:true})
+      this.utilsSrv.showToast({
+        message:'Producto actualizado',
+        color:'primary',
+        duration:2000,
+        position:'middle',
+        icon:'checkmark-circle-outline'
+      })
+    }).catch(error => {
+      this.utilsSrv.showToast({
+        message:error.message,
+        color:'danger',
+        duration:2000,
+        position:'middle',
+        icon:'alert-circle-outline'
+      })
+    }).finally(() => {
+      loading.then((res) => res.dismiss())
+    })
   }
 
   async addProduct(){

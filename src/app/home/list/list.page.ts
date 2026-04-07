@@ -1,7 +1,7 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonRefresher, IonRefresherContent, IonCard, IonCardContent,
+import { IonContent, IonRefresher, IonRefresherContent, IonCard,
         IonList, IonItemSliding, IonItem, IonAvatar, IonLabel, IonChip, IonItemOptions,
         IonItemOption, IonIcon, IonFab, IonFabButton
  } from '@ionic/angular/standalone';
@@ -19,7 +19,7 @@ import { orderBy } from 'firebase/firestore';
   styleUrls: ['./list.page.scss'],
   standalone: true,
   imports: [CommonModule, FormsModule, HeaderComponent, IonContent, IonRefresher, 
-    IonRefresherContent, IonCard, IonCardContent, IonList, IonItemSliding, IonItem, 
+    IonRefresherContent, IonCard, IonList, IonItemSliding, IonItem, 
     IonAvatar, IonLabel, IonChip, IonItemOptions, IonItemOption, IonIcon, IonFab, 
     IonFabButton]
 })
@@ -59,8 +59,54 @@ export class ListPage implements OnInit {
     if(success) this.getProducts()
   }
 
-  deleteProduct(item:Product){
+  async deleteProduct(item:Product){
+    const alert = await this.utilsSrv.showAlert({
+      header: 'Eliminar producto',
+      message: `¿Deseas eliminar ${item.name}?`,
+      mode: 'ios',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel'
+        },
+        {
+          text: 'Eliminar',
+          role: 'destructive',
+          handler: () => {
+            this.deleteProductById(item.id)
+          }
+        }
+      ]
+    })
 
+    await alert.present()
+  }
+
+  async deleteProductById(productId:string){
+    const path = `users/${this.user().uid}/products/${productId}`
+    const loading = await this.utilsSrv.showLoading()
+    await loading.present()
+
+    this.firebaseSrv.deleteDocument(path).then(() => {
+      this.utilsSrv.showToast({
+        message:'Producto eliminado',
+        color:'primary',
+        duration:2000,
+        position:'middle',
+        icon:'trash-outline'
+      })
+      this.getProducts()
+    }).catch(error => {
+      this.utilsSrv.showToast({
+        message:error.message,
+        color:'danger',
+        duration:2000,
+        position:'middle',
+        icon:'alert-circle-outline'
+      })
+    }).finally(() => {
+      loading.dismiss()
+    })
   }
 
   getProducts(){
@@ -73,7 +119,7 @@ export class ListPage implements OnInit {
       next:(res:any) => {
         this.products = res
         this.loading = false
-        sub.unsubscribe
+        sub.unsubscribe()
       }
     })
   }
