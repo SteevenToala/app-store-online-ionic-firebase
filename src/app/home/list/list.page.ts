@@ -12,6 +12,8 @@ import { Utils } from 'src/app/services/utils';
 import { User } from 'src/app/models/user';
 import { AddUpdateComponent } from 'src/app/shared/ui/add-update/add-update.component';
 import { orderBy } from 'firebase/firestore';
+import { addIcons } from 'ionicons';
+import { add, createOutline, shieldOutline, trashOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-list',
@@ -30,7 +32,9 @@ export class ListPage implements OnInit {
   firebaseSrv = inject(Firebase)
   utilsSrv = inject(Utils)
 
-  constructor() { }
+  constructor() {
+    this.registryIcons()
+  }
 
   ngOnInit() {
   }
@@ -122,6 +126,10 @@ export class ListPage implements OnInit {
         sub.unsubscribe()
       }
     })
+  }
+
+  registryIcons(){
+    addIcons({ add, createOutline, shieldOutline, trashOutline })
   }
 
 }
