@@ -53,13 +53,35 @@ export class AddUpdateComponent  implements OnInit {
     if(imageUrl) this.form.controls.image.setValue(imageUrl)
   }
 
-  updateProduct(){
-    let path = `users/${this.user.uid}/products/${this.product?.id}`
-    const loading = this.utilsSrv.showLoading()
-    loading.then((res) => res.present())
+  async updateProduct() {
+    let path = `users/${this.user.uid}/products/${this.product?.id}`;
+    const loading = await this.utilsSrv.showLoading();
+    loading.present();
 
-    const data = { ...this.form.value }
-    delete data.id
+    let dataUrl = this.form.value.image;
+    let imageUrl = this.product?.image || '';
+
+    if (typeof dataUrl === 'string' && dataUrl.startsWith('data:')) {
+      let imagePath = `${this.user.uid}/${Date.now()}l`;
+      imageUrl = await this.firebaseSrv.uploadImage(imagePath, dataUrl as string);
+      this.form.controls.image.setValue(imageUrl);
+      
+      if (this.product?.image && typeof this.product.image === 'string' && this.product.image.startsWith('https://')) {
+        console.log('URL imagen anterior:', this.product.image);
+        try {
+          const url = new URL(this.product.image);
+          const pathMatch = url.pathname.match(/\/o\/(.+)/);
+          if (pathMatch && pathMatch[1]) {
+            const storagePath = decodeURIComponent(pathMatch[1]);
+            await this.firebaseSrv.deleteFile(storagePath);
+          }
+        } catch (e) {
+          console.log('No se pudo construir la URL para eliminar la imagen:', this.product.image);
+        }
+      }
+    }
+    const data = { ...this.form.value };
+    delete data.id;
 
     this.firebaseSrv.updateDocument(path, data).then(() => {
       this.utilsSrv.dissmissModal({success:true})
@@ -79,7 +101,7 @@ export class AddUpdateComponent  implements OnInit {
         icon:'alert-circle-outline'
       })
     }).finally(() => {
-      loading.then((res) => res.dismiss())
+      loading.dismiss();
     })
   }
 

@@ -86,31 +86,49 @@ export class ListPage implements OnInit {
     await alert.present()
   }
 
-  async deleteProductById(productId:string){
-    const path = `users/${this.user().uid}/products/${productId}`
-    const loading = await this.utilsSrv.showLoading()
-    await loading.present()
+  async deleteProductById(productId: string) {
+    const path = `users/${this.user().uid}/products/${productId}`;
+    const loading = await this.utilsSrv.showLoading();
+    await loading.present();
+
+    
+    let product: Product | undefined = this.products.find(p => p.id === productId);
+   
+    // Elimina la imagen del storage si existe y es una URL
+    if (product && product.image && product.image.startsWith('https://')) {
+      try {
+        const url = new URL(product.image);
+        const pathMatch = url.pathname.match(/\/o\/(.+)/);
+        if (pathMatch && pathMatch[1]) {
+          const storagePath = decodeURIComponent(pathMatch[1]);
+          console.log('Eliminando imagen en storage:', storagePath);
+          await this.firebaseSrv.deleteFile(storagePath);
+        }
+      } catch (e) {
+        // Ignora errores de parseo/eliminación
+      }
+    }
 
     this.firebaseSrv.deleteDocument(path).then(() => {
       this.utilsSrv.showToast({
-        message:'Producto eliminado',
-        color:'primary',
-        duration:2000,
-        position:'middle',
-        icon:'trash-outline'
-      })
-      this.getProducts()
+        message: 'Producto eliminado',
+        color: 'primary',
+        duration: 2000,
+        position: 'middle',
+        icon: 'trash-outline'
+      });
+      this.getProducts();
     }).catch(error => {
       this.utilsSrv.showToast({
-        message:error.message,
-        color:'danger',
-        duration:2000,
-        position:'middle',
-        icon:'alert-circle-outline'
-      })
+        message: error.message,
+        color: 'danger',
+        duration: 2000,
+        position: 'middle',
+        icon: 'alert-circle-outline'
+      });
     }).finally(() => {
-      loading.dismiss()
-    })
+      loading.dismiss();
+    });
   }
 
   getProducts(){
