@@ -5,13 +5,12 @@
 export const environment = {
   production: false,
   firebaseConfig : {
-    apiKey: "AIzaSyC4phAl53w1Hn9db5B8BNmB4AUkZoxwjtU",
-    authDomain: "app-store-online-stoala.firebaseapp.com",
-    projectId: "app-store-online-stoala",
-    storageBucket: "app-store-online-stoala.firebasestorage.app",
-    messagingSenderId: "538928874803",
-    appId: "1:538928874803:web:1cc614bfa5eef475ca2a46",
-    measurementId: "G-D77LQPG8CF"
+    apiKey: "AIzaSyA3AklHVVePH9Bj89mqYEpJ3dpN7r1fkXs",
+    authDomain: "app-store-web-mobiles.firebaseapp.com",
+    projectId: "app-store-web-mobiles",
+    storageBucket: "app-store-web-mobiles.firebasestorage.app",
+    messagingSenderId: "1001865085980",
+    appId: "1:1001865085980:web:81197f216a873c58d20bd9"
   }
 };
 

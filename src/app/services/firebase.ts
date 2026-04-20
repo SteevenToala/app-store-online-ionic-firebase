@@ -71,5 +71,17 @@ export class Firebase {
   }
 
   //STORAGE
-  uploadImage(){}
+ async uploadImage(path:string, data_url:string){
+    return uploadString(ref(getStorage(),path), data_url, 'data_url').then(()=> {
+      return getDownloadURL(ref(getStorage(),path))
+    })
+ }
+
+ async getFilePath(path:string){
+  return ref(getStorage(),path).fullPath
+ }
+
+ deleteFile(path:string){
+  return deleteObject(ref(getStorage(),path))
+ }
 }

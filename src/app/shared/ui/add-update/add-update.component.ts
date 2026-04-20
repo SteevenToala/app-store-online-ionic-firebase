@@ -48,8 +48,9 @@ export class AddUpdateComponent  implements OnInit {
     }
   }
 
-  takeImage(){
-    
+  async takeImage(){
+    const imageUrl = (await this.utilsSrv.takeImage('Selecciona una imagen para tu producto')).dataUrl
+    if(imageUrl) this.form.controls.image.setValue(imageUrl)
   }
 
   updateProduct(){
@@ -89,7 +90,7 @@ export class AddUpdateComponent  implements OnInit {
 
     let dataUrl = this.form.value.image
     let imagePath = `${this.user.uid}/${Date.now()}l`
-    let imageUrl = 'url'
+    let imageUrl = await this.firebaseSrv.uploadImage(imagePath, dataUrl as string)
 
     this.form.controls.image.setValue(imageUrl)
     delete this.form.value.id

@@ -9,6 +9,9 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { environment } from './environments/environment';
 import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
+import {defineCustomElements} from '@ionic/pwa-elements/loader';
+
+defineCustomElements(window);
 
 bootstrapApplication(AppComponent, {
   providers: [
